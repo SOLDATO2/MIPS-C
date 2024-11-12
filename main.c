@@ -26,109 +26,61 @@ struct Instrucao {
 void criarRegistradores(struct PC *pc){
     //inicia todos os registradores com 0, vamos armazenar os valores dos registradores aqui
     for(int i = 0; i < REGISTRADORES; i++){
-        pc->vetor_registradores[i] = 0;
+        pc->vetor_registradores[i] = 1;
     }
     pc->pc_valor = 0; //inicia o pc em 0
 
 }
+
 int regIndice(char *registrador) {
     //https://melted-ray-4c3.notion.site/Aula-04-Aprofundamento-em-Assembly-MIPS-2c1510d6c9754cbea48e2b236ab4aeaf
     //retorna o indice do registrador mapeado
+    const char *registradores[] = {
+        "$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3",
+        "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
+        "$t8", "$t9", "$s0", "$s1", "$s2", "$s3", "$s4", "$s5",
+        "$s6", "$s7", "$k0", "$k1", "$gp", "$sp", "$fp", "$ra"
+    };
 
-    return (strcmp(registrador, "$zero") == 0) ? 0 :
-           (strcmp(registrador, "$at") == 0) ? 1 :
-           (strcmp(registrador, "$v0") == 0) ? 2 :
-           (strcmp(registrador, "$v1") == 0) ? 3 :
-           (strcmp(registrador, "$a0") == 0) ? 4 :
-           (strcmp(registrador, "$a1") == 0) ? 5 :
-           (strcmp(registrador, "$a2") == 0) ? 6 :
-           (strcmp(registrador, "$a3") == 0) ? 7 :
-           (strcmp(registrador, "$t0") == 0) ? 8 :
-           (strcmp(registrador, "$t1") == 0) ? 9 :
-           (strcmp(registrador, "$t2") == 0) ? 10 :
-           (strcmp(registrador, "$t3") == 0) ? 11 :
-           (strcmp(registrador, "$t4") == 0) ? 12 :
-           (strcmp(registrador, "$t5") == 0) ? 13 :
-           (strcmp(registrador, "$t6") == 0) ? 14 :
-           (strcmp(registrador, "$t7") == 0) ? 15 :
-           (strcmp(registrador, "$t8") == 0) ? 16 :
-           (strcmp(registrador, "$t9") == 0) ? 17 :
-           (strcmp(registrador, "$s0") == 0) ? 18 :
-           (strcmp(registrador, "$s1") == 0) ? 19 :
-           (strcmp(registrador, "$s2") == 0) ? 20 :
-           (strcmp(registrador, "$s3") == 0) ? 21 :
-           (strcmp(registrador, "$s4") == 0) ? 22 :
-           (strcmp(registrador, "$s5") == 0) ? 23 :
-           (strcmp(registrador, "$s6") == 0) ? 24 :
-           (strcmp(registrador, "$s7") == 0) ? 25 :
-           (strcmp(registrador, "$k0") == 0) ? 26 :
-           (strcmp(registrador, "$k1") == 0) ? 27 :
-           (strcmp(registrador, "$gp") == 0) ? 28 :
-           (strcmp(registrador, "$sp") == 0) ? 29 :
-           (strcmp(registrador, "$fp") == 0) ? 30 :
-           (strcmp(registrador, "$ra") == 0) ? 31 : -1;
+    for (int i = 0; i < REGISTRADORES; i++) {
+        if (strcmp(registrador, registradores[i]) == 0) return i;
+    }
+    return -1;
 }
 
-
-void lerInstrucao(char *buffer, struct Instrucao *instrucao){
+void lerInstrucao(char *buffer, struct Instrucao *instrucao) {
     //https://melted-ray-4c3.notion.site/Aula-04-Aprofundamento-em-Assembly-MIPS-2c1510d6c9754cbea48e2b236ab4aeaf
-
     char rt[10], rs[10], rd[10];
     int imediato;
-
-
     
     sscanf(buffer, "%s", instrucao->instrucao);
-    //ADDI e SUBI
-    if (strncmp(instrucao->instrucao, "ADDI", 4) == 0 || strncmp(instrucao->instrucao, "SUBI", 4) == 0) {
-        if (sscanf(buffer, "%s %[^,], %[^,], %d", instrucao->instrucao, rd, rs, &imediato) == 4) {
-            instrucao->rd = regIndice(rd);
-            instrucao->rs = regIndice(rs);
-            instrucao->imediato = imediato;
-            return;
-        }
-    }
 
-    //LI
-    if (sscanf(buffer, "%s %[^,], %d", instrucao->instrucao, rs, &imediato) == 3) {
+    //ADDI e SUBI
+    if (sscanf(buffer, "%s %[^,], %[^,], %d", instrucao->instrucao, rd, rs, &imediato) == 4) {
+        instrucao->rd = regIndice(rd);
         instrucao->rs = regIndice(rs);
         instrucao->imediato = imediato;
         return;
-    }
-
+    //LI
+    } else if (sscanf(buffer, "%s %[^,], %d", instrucao->instrucao, rs, &imediato) == 3) {
+        instrucao->rs = regIndice(rs);
+        instrucao->imediato = imediato;
+        return;
     //todos tipo R
-    if (sscanf(buffer, "%s %[^,], %[^,], %s", instrucao->instrucao, rd, rs, rt) == 4) {
+    } else if (sscanf(buffer, "%s %[^,], %[^,], %s", instrucao->instrucao, rd, rs, rt) == 4) {
         instrucao->rd = regIndice(rd);
         instrucao->rs = regIndice(rs);
         instrucao->rt = regIndice(rt);
-        
+        return;
+    //J e JAL
+    } else if (sscanf(buffer, "%s %d", instrucao->instrucao, &imediato) == 2) {
+        instrucao->imediato = imediato;
+        return;
+    //JR
+    } else if (sscanf(buffer, "%s %s", instrucao->instrucao, rs) == 2) {
+        instrucao->rs = regIndice(rs);
         return;
     }
-
-    //J
-    if (strncmp(instrucao->instrucao, "J", 2) == 0){
-        if (sscanf(buffer, "%s %d", instrucao->instrucao, &imediato) == 2){
-            instrucao->imediato = imediato;
-            return;
-        }
-    }
-    //JAL
-    if (strncmp(instrucao->instrucao, "JAL", 2) == 0){
-        if (sscanf(buffer, "%s %d", instrucao->instrucao, &imediato) == 2){
-            instrucao->imediato = imediato;
-            return;
-        }
-
-    }
-    //JR
-    if (strncmp(instrucao->instrucao, "JR", 2) == 0){
-        if (sscanf(buffer, "%s %s", instrucao->instrucao, rs) == 2){
-            instrucao->rs = regIndice(rs);
-            return;
-        }
-    }
-
-
 
     printf("Instrucao nao reconhecida\n");
 }
