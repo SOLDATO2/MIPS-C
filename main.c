@@ -26,7 +26,7 @@ struct Instrucao {
 void criarRegistradores(struct PC *pc){
     //inicia todos os registradores com 0, vamos armazenar os valores dos registradores aqui
     for(int i = 0; i < REGISTRADORES; i++){
-        pc->vetor_registradores[i] = 1;
+        pc->vetor_registradores[i] = 0;
     }
     pc->pc_valor = 0; //inicia o pc em 0
 
