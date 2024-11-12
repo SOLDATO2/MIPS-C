@@ -15,7 +15,7 @@ struct PC {
 };
 
 struct Instrucao {
-    //todos os campos para as instrucoes que estamos usando
+    //criando campos para armazenar informacoes da instrucao
     char instrucao[11];
     int rs;
     int rt;
@@ -178,7 +178,7 @@ void J(struct Instrucao *instrucao, struct PC *pc){
 }
 
 void JAL(struct Instrucao *instrucao, struct PC *pc){
-    pc->vetor_registradores[31] = pc->pc_valor + 4; //acessando o index direto aqui pq $ra é um registrador "escondido"
+    pc->vetor_registradores[31] = pc->pc_valor; //acessando o index direto aqui pq $ra é um registrador "escondido"
     pc->pc_valor = instrucao->imediato;
 }
 
@@ -260,11 +260,11 @@ void mostrarEstruturaInstrucao(struct Instrucao *instrucao){
         printf("Tipo I: Opcode: ");
         
         if(strcmp(instrucao->instrucao, "ADDI") == 0)
-            printf("8");
+            printf("8 ");
         else if(strcmp(instrucao->instrucao, "SUBI") == 0)
-            printf("8");
+            printf("8 ");
         else if(strcmp(instrucao->instrucao, "LI") == 0)
-            printf("8");
+            printf("8 ");
         
         printf("rs: %d, rt: %d, imediato: %d\n", instrucao->rs, instrucao->rd, instrucao->imediato);
         return;
@@ -275,11 +275,11 @@ void mostrarEstruturaInstrucao(struct Instrucao *instrucao){
         printf("Tipo J: Opcode: ");
         
         if(strcmp(instrucao->instrucao, "J") == 0)
-            printf("2");
+            printf("2 ");
         else if(strcmp(instrucao->instrucao, "JAL") == 0)
-            printf("3");
+            printf("3 ");
         else if(strcmp(instrucao->instrucao, "JR") == 0)
-            printf("0");
+            printf("0 ");
         
         if(strcmp(instrucao->instrucao, "JR") == 0)
             printf("rs: %d\n", instrucao->rs);
