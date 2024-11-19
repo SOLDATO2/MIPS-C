@@ -14,7 +14,7 @@ struct PC {
 };
 
 struct Instrucao {
-    // Campos para armazenar informações da instrução
+    // campos para armazenar informações da instrução
     char instrucao[11];
     int rs;
     int rt;
@@ -23,15 +23,15 @@ struct Instrucao {
 };
 
 void criarRegistradores(struct PC *pc){
-    //Inicia todos os registradores com 0, vamos armazenar os valores dos registradores aqui
+    //inicia todos os registradores com 0, vamos armazenar os valores dos registradores aqui
     for(int i = 0; i < REGISTRADORES; i++){
         pc->vetor_registradores[i] = 0;
     }
-    pc->pc_valor = 0; //program counter começa em 0
+    pc->pc_valor = 0;
 }
 
 int regIndice(char *registrador) {
-    // Retorna o índice do registrador mapeado
+    //retorna o índice do registrador mapeado
     const char *registradores[] = {
         "$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3",
         "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
@@ -46,34 +46,34 @@ int regIndice(char *registrador) {
 }
 
 void lerInstrucao(char *buffer, struct Instrucao *instrucao) {
-    // Análise da instrução
+    // campos para armazenar informações da instrução
     char rt[10], rs[10], rd[10];
     int imediato;
 
-    // Inicializa os campos
+    //inicia campos com 0
     instrucao->rs = instrucao->rt = instrucao->rd = instrucao->imediato = 0;
     sscanf(buffer, "%s", instrucao->instrucao);
 
-    // Instruções do tipo I: ADDI, ORI, ANDI
+    //ADDI, ORI, ANDI
     if (sscanf(buffer, "%s %[^,], %[^,], %d", instrucao->instrucao, rt, rs, &imediato) == 4) {
         instrucao->rt = regIndice(rt);
         instrucao->rs = regIndice(rs);
         instrucao->imediato = imediato;
         return;
     }
-    // Instruções do tipo R: ADD, SUB, AND, JR
+    //ADD, SUB, AND
     else if (sscanf(buffer, "%s %[^,], %[^,], %[^,]", instrucao->instrucao, rd, rs, rt) >= 4) {
         instrucao->rd = regIndice(rd);
         instrucao->rs = regIndice(rs);
         instrucao->rt = regIndice(rt);
         return;
     }
-    // Instruções do tipo J: J, JAL
+    //J, JAL
     else if (sscanf(buffer, "%s %d", instrucao->instrucao, &imediato) == 2) {
         instrucao->imediato = imediato;
         return;
     }
-    // Instrução JR (tipo R)
+    //JR
     else if (sscanf(buffer, "%s %s", instrucao->instrucao, rs) == 2) {
         instrucao->rs = regIndice(rs);
         return;
@@ -245,7 +245,6 @@ int main(){
     char buffer[50];
     criarRegistradores(&pc);
 
-    printf("Simulador MIPS\n");
     printf("Instruções suportadas: ADD, SUB, AND, ADDI, ORI, ANDI, J, JAL, JR\n\n");
 
     while(1){
@@ -254,6 +253,13 @@ int main(){
         if(fgets(buffer, sizeof(buffer), stdin) == NULL){
             printf("\nFim de entrada.\n");
             break;
+        }
+
+        buffer[strcspn(buffer, "\n")] = 0;
+
+        //ignora linha vazia
+        if(strlen(buffer) == 0){
+            continue;
         }
 
         lerInstrucao(buffer, &instrucao);
